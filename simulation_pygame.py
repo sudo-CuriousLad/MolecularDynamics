@@ -21,8 +21,8 @@ except ModuleNotFoundError as exc:
 import numpy as np
 
 
-WIDTH, HEIGHT = 1280, 820
-MIN_WIDTH, MIN_HEIGHT = 1050, 700
+WIDTH, HEIGHT = 1040, 680
+MIN_WIDTH, MIN_HEIGHT = 940, 620
 FPS = 60
 SIMULATION_HZ = 20
 
@@ -33,7 +33,7 @@ INTEGRATION_DT = DT / INTEGRATION_STEPS
 PARTICLE_MASS = 1.0
 INITIAL_PARTICLES = 20
 INITIAL_SPEED = 10.0
-INITIAL_K = 5.0
+INITIAL_K = 2.0
 INITIAL_RADIUS = 100.0
 MIN_PARTICLES, MAX_PARTICLES = 2, 80
 MIN_K, MAX_K = 1.0, 20.0
@@ -62,9 +62,16 @@ def sample_spherical(npoints: int, ndim: int = 3) -> np.ndarray:
 
 
 def make_atoms(n_count: int) -> np.ndarray:
-    """Create the notebook's [position, velocity, cell] particle array."""
+    """Create a [position, velocity, cell] array with well-spaced particles."""
     atoms = np.zeros((n_count, 9), dtype=np.float64)
-    atoms[:, :3] = np.floor(sample_spherical(n_count).T * 100.0)
+    # Start particles apart, rather than overlapping them in a small ball.
+    # Overlaps created large forces and an apparent speed jump after Reset.
+    for i in range(n_count):
+        for _ in range(1000):
+            position = np.random.uniform(-BOUNDS * 0.65, BOUNDS * 0.65, 3)
+            if i == 0 or np.all(np.linalg.norm(atoms[:i, :3] - position, axis=1) > INITIAL_RADIUS * 1.05):
+                break
+        atoms[i, :3] = position
     atoms[:, 3:6] = sample_spherical(n_count).T * INITIAL_SPEED
     update_cells(atoms, INITIAL_RADIUS)
     return atoms
@@ -192,13 +199,14 @@ class ParticleSimulation:
         self.simulated_time = 0.0
         self.reset()
 
-    def reset(self) -> None:
+    def reset(self, restore_defaults: bool = False) -> None:
+        """Start with fresh particles; optionally restore all original settings."""
+        if restore_defaults:
+            self.particle_count = INITIAL_PARTICLES
+            self.stiffness = INITIAL_K
+            self.interaction_radius = INITIAL_RADIUS
+            self.paused = False
         self.atoms = make_atoms(self.particle_count)
-        self.simulated_time = 0.0
-        self.times = [0.0]
-        self.kinetic_energies = []
-        self.potential_energies = []
-        self.total_energies = []
         self.reset_energy_history()
 
     def reset_energy_history(self) -> None:
@@ -263,7 +271,7 @@ class PygameApp:
         pygame.init()
         pygame.display.set_caption("Molecular Motion")
         self.screen = pygame.display.set_mode(
-            (WIDTH, HEIGHT), pygame.RESIZABLE | pygame.SCALED
+            (WIDTH, HEIGHT), pygame.RESIZABLE
         )
         self.clock = pygame.time.Clock()
         self.title_font = font(27, "bold")
@@ -296,11 +304,11 @@ class PygameApp:
 
     def layout(self) -> tuple[pygame.Rect, pygame.Rect, pygame.Rect]:
         width, height = self.screen.get_size()
-        margin, gap = 26, 20
-        control = pygame.Rect(margin, height - 148, width - margin * 2, 122)
-        content_y = 94
-        content_h = control.top - content_y - 18
-        side_w = min(360, max(310, int(width * 0.29)))
+        margin, gap = 22, 16
+        control = pygame.Rect(margin, height - 130, width - margin * 2, 108)
+        content_y = 90
+        content_h = control.top - content_y - 16
+        side_w = min(345, max(305, int(width * 0.30)))
         main_w = width - margin * 2 - gap - side_w
         main = pygame.Rect(margin, content_y, main_w, content_h)
         energy = pygame.Rect(main.right + gap, content_y, side_w, content_h)
@@ -328,13 +336,7 @@ class PygameApp:
             4,
         )
         self.screen.blit(status, (dot_x + 14, dot_y))
-        self.text(
-            self.screen,
-            "DRAG TO ORBIT",
-            (width - 164, 60),
-            SECONDARY_TEXT,
-            self.small_font,
-        )
+        # Controls are described beneath the title to keep the header tidy.
 
     def project(
         self, position: np.ndarray, center: tuple[float, float], scale: float
@@ -372,7 +374,7 @@ class PygameApp:
 
         plot = pygame.Rect(rect.x + 18, rect.y + 75, rect.width - 36, rect.height - 98)
         center = (plot.centerx, plot.centery + 2)
-        scale = min((plot.width - 70) / (4 * BOUNDS), (plot.height - 45) / (4 * BOUNDS))
+        scale = min((plot.width - 75) / (2.8 * BOUNDS), (plot.height - 50) / (2.8 * BOUNDS))
         corners = [
             np.array([x * BOUNDS, y * BOUNDS, z * BOUNDS], dtype=float)
             for x in (-1, 1)
@@ -421,7 +423,7 @@ class PygameApp:
 
     def draw_energy(self, rect: pygame.Rect) -> None:
         self.card(rect)
-        self.text(self.screen, "Energy conservation", (rect.x + 22, rect.y + 19), TEXT, self.heading_font)
+        self.text(self.screen, "Energy monitor", (rect.x + 22, rect.y + 19), TEXT, self.heading_font)
         kinetic = self.simulation.kinetic_energies[-1]
         potential = self.simulation.potential_energies[-1]
         total = self.simulation.total_energies[-1]
@@ -570,7 +572,7 @@ class PygameApp:
     def draw_controls(self, rect: pygame.Rect) -> None:
         self.card(rect, 16)
         top = rect.y + 49
-        self.text(self.screen, "Particles", (rect.x + 22, rect.y + 17), SECONDARY_TEXT, self.small_font)
+        self.text(self.screen, "PARTICLES", (rect.x + 22, rect.y + 17), SECONDARY_TEXT, self.small_font)
         count_value = str(self.simulation.particle_count)
         count_image = self.value_font.render(count_value, True, TEXT)
         self.screen.blit(count_image, (rect.x + 28, top - 13))
@@ -610,7 +612,7 @@ class PygameApp:
         )
         reset_rect = pygame.Rect(rect.right - 218, top - 17, 96, 36)
         pause_rect = pygame.Rect(rect.right - 108, top - 17, 90, 36)
-        self.draw_button("reset", "Reset", reset_rect)
+        self.draw_button("reset", "Reset all", reset_rect)
         self.draw_button(
             "pause",
             "Resume" if self.simulation.paused else "Pause",
@@ -638,7 +640,7 @@ class PygameApp:
         if event.type == pygame.VIDEORESIZE:
             self.screen = pygame.display.set_mode(
                 (max(MIN_WIDTH, event.w), max(MIN_HEIGHT, event.h)),
-                pygame.RESIZABLE | pygame.SCALED,
+                pygame.RESIZABLE,
             )
         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             position = event.pos
@@ -649,7 +651,8 @@ class PygameApp:
                     elif name == "plus":
                         self.simulation.set_particle_count(self.simulation.particle_count + 1)
                     elif name == "reset":
-                        self.simulation.reset()
+                        self.simulation.reset(restore_defaults=True)
+                        self.yaw, self.pitch = -0.66, 0.56
                     elif name == "pause":
                         self.simulation.paused = not self.simulation.paused
                     return True
@@ -674,7 +677,8 @@ class PygameApp:
             if event.key == pygame.K_SPACE:
                 self.simulation.paused = not self.simulation.paused
             elif event.key == pygame.K_r:
-                self.simulation.reset()
+                self.simulation.reset(restore_defaults=True)
+                self.yaw, self.pitch = -0.66, 0.56
             elif event.key == pygame.K_ESCAPE:
                 return False
         return True
