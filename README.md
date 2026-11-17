@@ -58,14 +58,14 @@ Also, $m$ is the mass of the atom.
 
 A single vector is chosen to represent the atom so that the vectorization capabilities of NumPy can be used to speed up calculations.
 
-
-
 The cell index $x_{cell}$ for a point is obtained by:
 
 $$ x_{cell} = \left[ \frac{x}{k} \right]$$
 
 The algorithm for calculating the forces on a particle hinges on the variation inverse square law, i.e
+
 $$ F \propto \frac{1}{r^2} $$
+
 where F is the force between any two chosen atoms and r is the separation between them.
 
 As distance increases, the force decreases significantly. This means the forces beyond a certain distance, which we'll call the cutoff radius $r_{cutoff}$, are very small and can be neglected.
