@@ -8,9 +8,13 @@ Details of members
  Sequence of videos:
  
  1st video by Avi Gupta
+
  2nd video by Yuvraj Singh Bachchawat
+
  3rd video by Snigdha Das
+
  4th video by Aryan Bhardwaj
+
 
  Roles and responsibilities:
 
