@@ -1,5 +1,7 @@
+## Overview
 This is our submission for the FOSC project, a toy to simulate the motion of gas particles with a mutual attractive force.
 
+## Methods
 The "atoms" are confined in an $l \times l \times l$ box, which is subdivided into cells of volume $k \times k \times k$, with each cell having cell indices $x_{cell}, y_{cell}, z_{cell}$.
 
 An atom is defined by the following data scheme:
@@ -36,7 +38,7 @@ The cell index $x_{cell}$ for a point is obtained by:
 
 $$ x_{cell} = \left[ \frac{x}{k} \right]$$
 
-The algorithm for calculating the forces on a particle hinges on the inverse square law, i.e
+The algorithm for calculating the forces on a particle hinges on the variation inverse square law, i.e
 $$ F \propto \frac{1}{r^2} $$
 where F is the force between any two chosen atoms and r is the separation between them.
 
@@ -46,6 +48,24 @@ So, we choose the cell edge size $k$ such that the cutoff radius only extends to
 
 This allows us to heavily optimize computation where we only calculate the forces of particles with the aforementioned cells instead of the those entire  box volume. This gives huge gains in performance as division is a very computationally expensive operation.
 
-So for every step, for each particle, we select only the particles within 2 cells of the particle's cell and compute the forces exerted on the particles and sum them together, and use them to update the velocity of the particle.
+The force between two particles is approximated as:
+
+$$ F \approx - k'\times (r - r_{0})^2 $$
+
+where r is the distance between the two particles, $r_0$ is the natural interaction distance, and $k'$ is the force constant.
+
+So for every step, for each particle, we select only the particles within 2 cells of the particle's cell.
+
+We select and compute the forces exerted on the particles and sum them together, and use them to update the velocity of the particle.
 
 The total potential energy is computed by summing the pairwise interaction energies of each particle with all other particles.
+
+Sliders are given for $k'$ and $r_{cutoff}$.
+
+## Possible improvements
+
+The use of a Verlet neighbour list would speed up the process of computing forces incredibly.
+
+There are also optimizations in the way NumPy is used here that would be incredibly helpful in both computation cost and speed.
+
+There are also probably better ways to calculate the dynamics of the system, like the use of Verlet integration instead of the basic stepping algorithm used here.
