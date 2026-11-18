@@ -2,23 +2,23 @@ Details of members
  
  1. Avi Gupta MS26BTECH11007
  2. Yuvraj Singh B. MS26BTECH11039
- 3. Snigdha Das MS26BTECH11032
+ 3. Snigdha Das MS26BTECH11034
  4. Aryan Bhardwaj MS26BTECH11007
 
  Sequence of videos:
  
- 1st video by Avi Gupta
+ 1st video clip by Avi Gupta
 
- 2nd video by Yuvraj Singh Bachchawat
+ 2nd video clip by Yuvraj Singh Bachchawat
 
- 3rd video by Snigdha Das
+ 3rd video clip by Snigdha Das
 
- 4th video by Aryan Bhardwaj
+ 4th video clip by Aryan Bhardwaj
 
 
  Roles and responsibilities:
 
- 1. Avi Gupta: Particle and NumPy initialization, tests, user interface.
+ 1. Avi Gupta: Particle and NumPy initialization, tests, interactive user interface, limitation of code.
  2. Yuvraj Singh: Force calculation and integration algorithm design and optimization.
  3. Snigdha Das: Implementation, energy conservation and calculation.
  4. Aryan: Visualization, bug fixing and testing.
