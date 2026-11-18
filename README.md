@@ -16,20 +16,21 @@ Details of members
  4th video clip by Aryan Bhardwaj
 
 
- Roles and responsibilities:
+## Roles and responsibilities
 
- 1. Avi Gupta: Particle and NumPy initialization, tests, interactive user interface, limitation of code.
- 2. Yuvraj Singh: Force calculation and integration algorithm design and optimization.
- 3. Snigdha Das: Implementation, energy conservation and calculation.
- 4. Aryan: Visualization, bug fixing and testing.
+ 1. **Avi Gupta:** Particle and NumPy initialization, testing, UI layout and design, bug fixing, reset functionality and code refinement.
+ 2. **Yuvraj Singh Bachchawat:** Force calculation, numerical integration, and optimization of the particle interaction model.
+ 3. **Snigdha Das:** Energy calculations, conservation checks, analysis and implementation of energy monitoring.
+ 4. **Aryan Bhardwaj:** 3D visualization, rendering, interface interaction, bug fixing and testing.
 
-Acknowledgement of AI usage:
-1. Gemini - Used for optimization and code refinement and UI rehaul
+## Acknowledgement of AI usage
+Gemini was used to assist with code optimization, refinement and improvements to the UI layout. The team reviewed, tested and modified the resulting code as part of the project.
 
-##
 
 ## Overview
-This is our submission for the FOSC project, a toy to simulate the motion of gas particles with a mutual attractive force.
+This is our FOSC project: an interactive, simplified 3D particle-motion simulation. Particles move inside a box, bounce off its walls, and exert short-range repulsive forces on nearby particles. The interface lets us change particle count, interaction strength and interaction radius, and view how the energy changes over time.
+
+**Repository:** https://github.com/sudo-CuriousLad/MolecularDynamics/tree/main
 
 ## Methods
 The "atoms" are confined in an $l \times l \times l$ box, which is subdivided into cells of volume $k \times k \times k$, with each cell having cell indices $x_{cell}, y_{cell}, z_{cell}$.
